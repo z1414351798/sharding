@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.z.sharding.mapper.OrderMapper">
+
+    <insert id="insert" parameterType="com.z.sharding.pojo.Order">
+        INSERT INTO t_order(id, user_id, region_code , good_id, good_name, create_time, update_time)
+        VALUES (#{id}, #{userId}, #{regionCode}, #{goodId}, #{goodName}, #{createTime}, #{updateTime})
+    </insert>
+
+    <select id="selectByUserId" parameterType="String" resultType="com.z.sharding.pojo.Order">
+        SELECT
+        id AS id,
+        user_id AS userId,
+        region_code AS regionCode,
+        good_id AS goodId,
+        good_name AS goodName,
+        create_time AS createTime,
+        update_time AS updateTime
+        FROM t_order
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectByOrderId" parameterType="java.lang.Long" resultType="com.z.sharding.pojo.Order">
+        SELECT
+        id AS id,
+        user_id AS userId,
+        region_code AS regionCode,
+        good_id AS goodId,
+        good_name AS goodName,
+        create_time AS createTime,
+        update_time AS updateTime
+        FROM t_order
+        WHERE id = #{orderId}
+    </select>
+
+</mapper>

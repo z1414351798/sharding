@@ -1,0 +1,80 @@
+dataSources:
+  ds0:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_0?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+    username: root
+    password: z7763882336
+  ds1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+    username: root
+    password: z7763882336
+  ds2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_2?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+    username: root
+    password: z7763882336
+  ds3:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_3?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+    username: root
+    password: z7763882336
+
+rules:
+  - !SHARDING
+    broadcastTables:
+      - t_region
+    tables:
+      # 订单表
+      t_order:
+        actualDataNodes: ds$->{0..3}.t_order_$->{0..7}
+        # 分库策略
+        databaseStrategy:
+          complex:
+            shardingColumns: id,user_id
+            shardingAlgorithmName: hash-slot-algorithm
+        # 分表策略
+        tableStrategy:
+          complex:
+            shardingColumns: id,user_id
+            shardingAlgorithmName: hash-slot-table-algorithm
+      # 用户表
+      t_user:
+        actualDataNodes: ds$->{0..3}.t_user_$->{0..7}
+        # 分库策略
+        databaseStrategy:
+          complex:
+            shardingColumns: user_id
+            shardingAlgorithmName: hash-slot-algorithm
+        # 分表策略
+        tableStrategy:
+          complex:
+            shardingColumns: user_id
+            shardingAlgorithmName: hash-slot-table-algorithm
+
+
+    # 分片算法
+    shardingAlgorithms:
+      hash-slot-algorithm:
+        type: CLASS_BASED
+        props:
+          strategy: complex
+          algorithmClassName: com.z.sharding.algrithm.HashSlotAlgorithm
+      hash-slot-table-algorithm:
+        type: CLASS_BASED
+        props:
+          strategy: complex
+          algorithmClassName: com.z.sharding.algrithm.HashSlotAlgorithm
+          # 非默认值，直接对分片数取余
+          directIndex: true
+
+
+
+
+props:
+  # 日志显示 SQL
+  sql-show: true
