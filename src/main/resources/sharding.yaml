@@ -26,6 +26,8 @@ dataSources:
 
 rules:
   - !SHARDING
+    bindingTables:
+      - t_order,t_order_item
     broadcastTables:
       - t_region
     tables:
@@ -35,12 +37,25 @@ rules:
         # 分库策略
         databaseStrategy:
           complex:
-            shardingColumns: id,user_id
+            shardingColumns: order_id,user_id
             shardingAlgorithmName: hash-slot-algorithm
         # 分表策略
         tableStrategy:
           complex:
-            shardingColumns: id,user_id
+            shardingColumns: order_id,user_id
+            shardingAlgorithmName: hash-slot-table-algorithm
+      # 订单表
+      t_order_item:
+        actualDataNodes: ds$->{0..3}.t_order_item_$->{0..7}
+        # 分库策略
+        databaseStrategy:
+          complex:
+            shardingColumns: order_id,user_id
+            shardingAlgorithmName: hash-slot-algorithm
+        # 分表策略
+        tableStrategy:
+          complex:
+            shardingColumns: order_id,user_id
             shardingAlgorithmName: hash-slot-table-algorithm
       # 用户表
       t_user:
@@ -56,7 +71,6 @@ rules:
             shardingColumns: user_id
             shardingAlgorithmName: hash-slot-table-algorithm
 
-
     # 分片算法
     shardingAlgorithms:
       hash-slot-algorithm:
@@ -71,9 +85,6 @@ rules:
           algorithmClassName: com.z.sharding.algrithm.HashSlotAlgorithm
           # 非默认值，直接对分片数取余
           directIndex: true
-
-
-
 
 props:
   # 日志显示 SQL

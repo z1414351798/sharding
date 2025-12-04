@@ -18,7 +18,7 @@ public class OrderController {
 
     @PostMapping("/add")
     public String addOrder(@RequestBody Order order) {
-        order.setId(MySnowflakeGenerator.getInstance().generate(order.getUserId()));
+        order.setOrderId(MySnowflakeGenerator.getInstance().generate(order.getUserId()));
         order.setUpdateTime(LocalDateTime.now());
         order.setCreateTime(LocalDateTime.now());
         orderMapper.insert(order);
@@ -31,7 +31,7 @@ public class OrderController {
     }
 
     @GetMapping("/listByOrderId")
-    public List<Order> listByOrderId(@RequestParam  Long orderId) {
+    public List<Order> listByOrderId(@RequestParam  long orderId) {
         return orderMapper.selectByOrderId(orderId);
     }
 }

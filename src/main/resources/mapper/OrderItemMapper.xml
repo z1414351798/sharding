@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.z.sharding.mapper.OrderItemMapper">
+
+    <resultMap id="OrderItemResultMap" type="com.z.sharding.pojo.OrderItem">
+        <id     property="itemId" column="item_id"/>
+        <result property="orderId" column="item_order_id"/>
+        <result property="userId" column="item_user_id"/>
+        <result property="goodId" column="good_id"/>
+        <result property="goodNameSnapshot" column="good_name_snapshot"/>
+        <result property="goodPriceSnapshot" column="good_price_snapshot"/>
+        <result property="goodImageSnapshot" column="good_image_snapshot"/>
+        <result property="attributesSnapshotJson" column="attributes_snapshot_json"/>
+        <result property="quantity" column="quantity"/>
+        <result property="createTime" column="item_create_time"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.z.sharding.pojo.OrderItem">
+        INSERT INTO t_order_item(item_id, order_id, user_id, good_id, good_name_snapshot , good_price_snapshot, good_image_snapshot, attributes_snapshot_json, quantity, create_time)
+        VALUES (#{itemId}, #{orderId}, #{userId}, #{goodId}, #{goodNameSnapshot}, #{goodPriceSnapshot}, #{goodImageSnapshot}, #{attributesSnapshotJson}, #{quantity}, #{createTime})
+    </insert>
+
+    <select id="selectByItemId" parameterType="long" resultMap="OrderItemResultMap">
+        SELECT
+        item_id,
+        order_id,
+        user_id,
+        good_id,
+        good_name_snapshot,
+        good_price_snapshot,
+        good_image_snapshot,
+        attributes_snapshot_json,
+        quantity,
+        create_time
+        FROM t_order_item
+        WHERE item_id = #{itemId}
+    </select>
+
+    <select id="selectByOrderId" parameterType="long" resultMap="OrderItemResultMap">
+        SELECT
+        item_id,
+        order_id,
+        user_id,
+        good_id,
+        good_name_snapshot,
+        good_price_snapshot,
+        good_image_snapshot,
+        attributes_snapshot_json,
+        quantity,
+        create_time
+        FROM t_order_item
+        WHERE order_id = #{orderId}
+    </select>
+
+    <select id="selectByUserId" parameterType="String" resultMap="OrderItemResultMap">
+        SELECT
+        item_id,
+        order_id,
+        user_id,
+        good_id,
+        good_name_snapshot,
+        good_price_snapshot,
+        good_image_snapshot,
+        attributes_snapshot_json,
+        quantity,
+        create_time
+        FROM t_order_item
+        WHERE user_id = #{userId}
+    </select>
+
+</mapper>

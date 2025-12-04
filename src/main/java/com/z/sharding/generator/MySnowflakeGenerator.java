@@ -23,7 +23,7 @@ public class MySnowflakeGenerator {
 
     public synchronized long generate(String userId) {
 
-        int workerId = CRC32Util.hash(userId) % 1024;
+        long workerId = CRC32Util.hash(userId) % 1024;
 
         long timestamp = System.currentTimeMillis();
 
@@ -40,6 +40,6 @@ public class MySnowflakeGenerator {
 
         lastTimestamp = timestamp;
 
-        return (timestamp << 22) | ((long) workerId << 12) | sequence;
+        return (timestamp << 22) | ( workerId << 12) | sequence;
     }
 }

@@ -13,7 +13,7 @@ public class HashSlotAlgorithm implements ComplexKeysShardingAlgorithm<Comparabl
     private Properties props = new Properties();
 
     // 主键列名（Snowflake ID）
-    private static final String PRIMARY_KEY = "id";
+    private static final String PRIMARY_KEY = "order_id";
 
     // 分片键 user_id
     private static final String USER_ID_KEY = "user_id";
@@ -25,7 +25,7 @@ public class HashSlotAlgorithm implements ComplexKeysShardingAlgorithm<Comparabl
         int count = availableTargetNames.size();
         Object[] targets = availableTargetNames.toArray();
 
-        // ① 优先用主键 id 精准路由
+        // ① 优先用主键 order_id 精准路由
         List<Comparable<?>> idValues = getShardingValues(shardingValue, PRIMARY_KEY);
         if (!idValues.isEmpty()) {
             List<String> result = new ArrayList<>();

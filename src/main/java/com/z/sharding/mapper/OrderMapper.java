@@ -12,5 +12,5 @@ public interface OrderMapper {
 
     List<Order> selectByUserId(String userId);
 
-    List<Order> selectByOrderId(Long orderId);
+    List<Order> selectByOrderId(long orderId);
 }
