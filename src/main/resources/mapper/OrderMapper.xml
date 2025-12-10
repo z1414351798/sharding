@@ -37,6 +37,7 @@
     <insert id="insert" parameterType="com.z.sharding.pojo.Order">
         INSERT INTO t_order(order_id, user_id, region_code , total_amount, status, create_time, update_time, version)
         VALUES (#{orderId}, #{userId}, #{regionCode}, #{totalAmount}, #{status}, #{createTime}, #{updateTime}, #{version})
+        ON DUPLICATE KEY UPDATE order_id = order_id
     </insert>
 
     <select id="selectByUserId"

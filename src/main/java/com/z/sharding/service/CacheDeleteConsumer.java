@@ -8,12 +8,15 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 
+import java.util.concurrent.ExecutorService;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CacheDeleteConsumer {
 
     private final RedissonClient redissonClient;
+    private final ExecutorService cacheDeleteExecutor;
 
     @KafkaListener(
             topics = "order-cache-delete",
@@ -21,36 +24,35 @@ public class CacheDeleteConsumer {
             containerFactory = "manualAckKafkaListenerContainerFactory"
     )
     public void onMessage(String message, Acknowledgment ack) {
-        try {
-            String[] arr = message.split("\\|");
-            String key = arr[0];
-            long newVersion = Long.parseLong(arr[1]);
 
-            if (newVersion != 0){
-                RBucket<Long> versionBucket = redissonClient.getBucket(key + ":version");
-
-                // 🔥 版本更新成功返回 1，才允许提交 offset
-                versionBucket.set(newVersion);
+        cacheDeleteExecutor.submit(() -> {
+            try {
+                process(message);
+                ack.acknowledge(); // 业务成功后再 commit offset
+            } catch (Exception e) {
+                log.error("异步处理失败，等待 Kafka 重投 message={}", message, e);
+                // 不提交 offset，Kafka 自动重试
             }
-
-            // 删除缓存
-            boolean deleted = redissonClient.getBucket(key).delete();
-
-            if (!deleted) {
-                throw new RuntimeException("Redis 删除失败，key=" + key);
-            }
-
-            log.info("删除缓存成功 key={}, version={}", key, newVersion);
-
-            // 🔥🔥🔥 手动提交 offset（关键）
-            ack.acknowledge();
-
-        } catch (Exception e) {
-            log.error("删除缓存失败 message={}", message, e);
-
-            // ❌ 不提交 offset → Kafka 自动重试 → 重试失败进入 DLT
-            // ack 不能调用
-        }
+        });
     }
 
+    // 真正逻辑（线程池执行）
+    private void process(String message) {
+        String[] arr = message.split("\\|");
+        String key = arr[0];
+        long newVersion = Long.parseLong(arr[1]);
+
+        if (newVersion != 0) {
+            RBucket<Long> versionBucket = redissonClient.getBucket(key + ":version");
+            Long current = versionBucket.get();
+
+            if (current == null || newVersion >= current) {
+                versionBucket.set(newVersion);
+            }
+        }
+
+        redissonClient.getBucket(key).delete();
+
+        log.info("缓存删除成功 key={}, version={}", key, newVersion);
+    }
 }
