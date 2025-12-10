@@ -7,8 +7,8 @@
 
     <resultMap id="OrderItemResultMap" type="com.z.sharding.pojo.OrderItem">
         <id     property="itemId" column="item_id"/>
-        <result property="orderId" column="item_order_id"/>
-        <result property="userId" column="item_user_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="userId" column="user_id"/>
         <result property="goodId" column="good_id"/>
         <result property="goodNameSnapshot" column="good_name_snapshot"/>
         <result property="goodPriceSnapshot" column="good_price_snapshot"/>
@@ -16,6 +16,7 @@
         <result property="attributesSnapshotJson" column="attributes_snapshot_json"/>
         <result property="quantity" column="quantity"/>
         <result property="createTime" column="item_create_time"/>
+        <result property="version" column="version"/>
     </resultMap>
 
     <resultMap id="OrderResultMap" type="com.z.sharding.pojo.Order">
@@ -26,7 +27,7 @@
         <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
         <result property="updateTime" column="update_time"/>
-
+        <result property="version" column="version"/>
         <!-- 映射 OrderItem 列表 -->
         <collection property="orderItemList"
                     resultMap="OrderItemResultMap"/>
@@ -34,8 +35,8 @@
 
 
     <insert id="insert" parameterType="com.z.sharding.pojo.Order">
-        INSERT INTO t_order(order_id, user_id, region_code , total_amount, status, create_time, update_time)
-        VALUES (#{orderId}, #{userId}, #{regionCode}, #{totalAmount}, #{status}, #{createTime}, #{updateTime})
+        INSERT INTO t_order(order_id, user_id, region_code , total_amount, status, create_time, update_time, version)
+        VALUES (#{orderId}, #{userId}, #{regionCode}, #{totalAmount}, #{status}, #{createTime}, #{updateTime}, #{version})
     </insert>
 
     <select id="selectByUserId"
@@ -50,20 +51,23 @@
         o.status,
         o.create_time,
         o.update_time,
+        o.version,
 
         oi.item_id,
-        oi.order_id AS item_order_id,
-        oi.user_id AS item_user_id,
+        oi.order_id,
+        oi.user_id,
         oi.good_id,
         oi.good_name_snapshot,
         oi.good_price_snapshot,
         oi.good_image_snapshot,
         oi.attributes_snapshot_json,
         oi.quantity,
-        oi.create_time AS item_create_time
+        oi.create_time AS item_create_time,
+        oi.version
+
 
         FROM t_order o
-        INNER JOIN t_order_item oi ON o.order_id = oi.order_id
+        LEFT JOIN t_order_item oi ON o.order_id = oi.order_id
         WHERE o.user_id = #{userId}
         ORDER BY o.order_id, oi.item_id;
 
@@ -83,24 +87,81 @@
         o.status,
         o.create_time,
         o.update_time,
+        o.version,
 
         oi.item_id,
-        oi.order_id AS item_order_id,
-        oi.user_id AS item_user_id,
+        oi.order_id,
+        oi.user_id,
         oi.good_id,
         oi.good_name_snapshot,
         oi.good_price_snapshot,
         oi.good_image_snapshot,
         oi.attributes_snapshot_json,
         oi.quantity,
-        oi.create_time AS item_create_time
+        oi.create_time AS item_create_time,
+        oi.version
 
         FROM t_order o
-        INNER JOIN t_order_item oi ON o.order_id = oi.order_id
+        LEFT JOIN t_order_item oi ON o.order_id = oi.order_id
         WHERE o.order_id = #{order_id}
         ORDER BY o.order_id, oi.item_id;
 
     </select>
+
+
+    <select id="selectVersion" resultType="long">
+        SELECT version FROM t_order WHERE order_id = #{orderId}
+    </select>
+
+    <update id="updateOrderWithVersion">
+        UPDATE t_order
+        <set>
+            <if test="order.status != null">
+                status = #{order.status},
+            </if>
+            <if test="order.totalAmount != null">
+                total_amount = #{order.totalAmount},
+            </if>
+            <if test="order.userId != null">
+                user_id = #{order.userId},
+            </if>
+            <if test="order.regionCode != null">
+                region_code = #{order.regionCode},
+            </if>
+            <if test="order.version != null">
+                version = #{order.version},
+            </if>
+            <!-- 自动更新时间 -->
+            update_time = NOW()
+        </set>
+        WHERE order_id = #{order.orderId}
+        AND version = #{oldVersion}   <!-- 乐观锁 -->
+    </update>
+
+
+    <update id="updateOrderDynamic" parameterType="com.z.sharding.pojo.Order">
+        UPDATE t_order
+        <set>
+            <if test="status != null">
+                status = #{status},
+            </if>
+            <if test="totalAmount != null">
+                total_amount = #{totalAmount},
+            </if>
+            <if test="userId != null">
+                user_id = #{userId},
+            </if>
+            <if test="regionCode != null">
+                region_code = #{regionCode},
+            </if>
+            <if test="version != null">
+                version = #{version},
+            </if>
+            <!-- 自动更新时间 -->
+            update_time = NOW()
+        </set>
+        WHERE order_id = #{orderId}
+    </update>
 
 
 

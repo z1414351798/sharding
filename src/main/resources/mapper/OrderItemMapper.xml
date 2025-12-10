@@ -7,20 +7,23 @@
 
     <resultMap id="OrderItemResultMap" type="com.z.sharding.pojo.OrderItem">
         <id     property="itemId" column="item_id"/>
-        <result property="orderId" column="item_order_id"/>
-        <result property="userId" column="item_user_id"/>
+        <result property="orderId" column="order_id"/>
+        <result property="userId" column="user_id"/>
         <result property="goodId" column="good_id"/>
         <result property="goodNameSnapshot" column="good_name_snapshot"/>
         <result property="goodPriceSnapshot" column="good_price_snapshot"/>
         <result property="goodImageSnapshot" column="good_image_snapshot"/>
         <result property="attributesSnapshotJson" column="attributes_snapshot_json"/>
         <result property="quantity" column="quantity"/>
-        <result property="createTime" column="item_create_time"/>
+        <result property="itemIndex" column="item_index"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="version" column="version"/>
     </resultMap>
 
     <insert id="insert" parameterType="com.z.sharding.pojo.OrderItem">
-        INSERT INTO t_order_item(item_id, order_id, user_id, good_id, good_name_snapshot , good_price_snapshot, good_image_snapshot, attributes_snapshot_json, quantity, create_time)
-        VALUES (#{itemId}, #{orderId}, #{userId}, #{goodId}, #{goodNameSnapshot}, #{goodPriceSnapshot}, #{goodImageSnapshot}, #{attributesSnapshotJson}, #{quantity}, #{createTime})
+        INSERT INTO t_order_item(item_id, order_id, user_id, good_id, good_name_snapshot , good_price_snapshot, good_image_snapshot, attributes_snapshot_json, quantity, item_index, create_time, update_time, version)
+        VALUES (#{itemId}, #{orderId}, #{userId}, #{goodId}, #{goodNameSnapshot}, #{goodPriceSnapshot}, #{goodImageSnapshot}, #{attributesSnapshotJson}, #{quantity}, #{itemIndex}, #{createTime}, #{updateTime}, #{version})
     </insert>
 
     <select id="selectByItemId" parameterType="long" resultMap="OrderItemResultMap">
@@ -34,7 +37,10 @@
         good_image_snapshot,
         attributes_snapshot_json,
         quantity,
-        create_time
+        item_index,
+        create_time,
+        update_time,
+        version
         FROM t_order_item
         WHERE item_id = #{itemId}
     </select>
@@ -50,7 +56,10 @@
         good_image_snapshot,
         attributes_snapshot_json,
         quantity,
-        create_time
+        item_index,
+        create_time,
+        update_time,
+        version
         FROM t_order_item
         WHERE order_id = #{orderId}
     </select>
@@ -66,9 +75,44 @@
         good_image_snapshot,
         attributes_snapshot_json,
         quantity,
-        create_time
+        item_index,
+        create_time,
+        version
         FROM t_order_item
         WHERE user_id = #{userId}
     </select>
+
+    <update id="updateOrderItemDynamic" parameterType="com.z.sharding.pojo.OrderItem">
+        UPDATE t_order_item
+        <set>
+            <if test="goodId != null">
+                good_id = #{goodId},
+            </if>
+            <if test="goodNameSnapshot != null">
+                total_amount = #{goodNameSnapshot},
+            </if>
+            <if test="goodPriceSnapshot != null">
+                good_price_snapshot = #{goodPriceSnapshot},
+            </if>
+            <if test="goodImageSnapshot != null">
+                good_image_snapshot = #{goodImageSnapshot},
+            </if>
+            <if test="attributesSnapshotJson != null">
+                attributes_snapshot_json = #{attributesSnapshotJson},
+            </if>
+            <if test="quantity != null">
+                quantity = #{quantity},
+            </if>
+            <if test="itemIndex != null">
+                item_index = #{itemIndex},
+            </if>
+            <if test="version != null">
+                version = #{version},
+            </if>
+            <!-- 自动更新时间 -->
+            update_time = NOW()
+        </set>
+        WHERE item_id = #{itemId}
+    </update>
 
 </mapper>

@@ -1,91 +1,197 @@
 dataSources:
-  ds0:
+
+  # ----------- ds0 -----------
+  ds0_master:
     dataSourceClassName: com.zaxxer.hikari.HikariDataSource
     driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_0?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
-    username: root
-    password: z7763882336
-  ds1:
-    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
-    username: root
-    password: z7763882336
-  ds2:
-    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_2?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
-    username: root
-    password: z7763882336
-  ds3:
-    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
-    driverClassName: com.mysql.cj.jdbc.Driver
-    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_3?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8&useTimezone=true
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_0?useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: z7763882336
 
+  ds0_slave1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3307/ds_0?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds0_slave2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3308/ds_0?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  # ----------- ds1 -----------
+  ds1_master:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_1?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds1_slave1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3307/ds_1?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds1_slave2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3308/ds_1?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  # ----------- ds2 -----------
+  ds2_master:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_2?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds2_slave1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3307/ds_2?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds2_slave2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3308/ds_2?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  # ----------- ds3 -----------
+  ds3_master:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3306/ds_3?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds3_slave1:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3307/ds_3?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+  ds3_slave2:
+    dataSourceClassName: com.zaxxer.hikari.HikariDataSource
+    driverClassName: com.mysql.cj.jdbc.Driver
+    jdbcUrl: jdbc:mysql://127.0.0.1:3308/ds_3?useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: z7763882336
+
+
+
 rules:
+
+  # =====================
+  # 1. 读写分离配置
+  # =====================
+  - !READWRITE_SPLITTING
+    dataSources:
+      ds0:
+        staticStrategy:
+          writeDataSourceName: ds0_master
+          readDataSourceNames:
+            - ds0_slave1
+            - ds0_slave2
+        loadBalancerName: round_robin
+
+      ds1:
+        staticStrategy:
+          writeDataSourceName: ds1_master
+          readDataSourceNames:
+            - ds1_slave1
+            - ds1_slave2
+        loadBalancerName: round_robin
+
+      ds2:
+        staticStrategy:
+          writeDataSourceName: ds2_master
+          readDataSourceNames:
+            - ds2_slave1
+            - ds2_slave2
+        loadBalancerName: round_robin
+
+      ds3:
+        staticStrategy:
+          writeDataSourceName: ds3_master
+          readDataSourceNames:
+            - ds3_slave1
+            - ds3_slave2
+        loadBalancerName: round_robin
+
+    loadBalancers:
+      round_robin:
+        type: ROUND_ROBIN
+
+
+  # =====================
+  # 2. 分库分表配置
+  # =====================
   - !SHARDING
     bindingTables:
       - t_order,t_order_item
     broadcastTables:
       - t_region
+
     tables:
-      # 订单表
+
       t_order:
         actualDataNodes: ds$->{0..3}.t_order_$->{0..7}
-        # 分库策略
         databaseStrategy:
           complex:
-            shardingColumns: order_id,user_id
+            shardingColumns: order_id, user_id
             shardingAlgorithmName: hash-slot-algorithm
-        # 分表策略
         tableStrategy:
           complex:
-            shardingColumns: order_id,user_id
+            shardingColumns: order_id, user_id
             shardingAlgorithmName: hash-slot-table-algorithm
-      # 订单表
+
       t_order_item:
         actualDataNodes: ds$->{0..3}.t_order_item_$->{0..7}
-        # 分库策略
         databaseStrategy:
           complex:
-            shardingColumns: order_id,user_id
+            shardingColumns: order_id, user_id
             shardingAlgorithmName: hash-slot-algorithm
-        # 分表策略
         tableStrategy:
           complex:
-            shardingColumns: order_id,user_id
+            shardingColumns: order_id, user_id
             shardingAlgorithmName: hash-slot-table-algorithm
-      # 用户表
+
       t_user:
         actualDataNodes: ds$->{0..3}.t_user_$->{0..7}
-        # 分库策略
         databaseStrategy:
           complex:
             shardingColumns: user_id
             shardingAlgorithmName: hash-slot-algorithm
-        # 分表策略
         tableStrategy:
           complex:
             shardingColumns: user_id
             shardingAlgorithmName: hash-slot-table-algorithm
 
-    # 分片算法
     shardingAlgorithms:
       hash-slot-algorithm:
         type: CLASS_BASED
         props:
           strategy: complex
           algorithmClassName: com.z.sharding.algrithm.HashSlotAlgorithm
+
       hash-slot-table-algorithm:
         type: CLASS_BASED
         props:
           strategy: complex
           algorithmClassName: com.z.sharding.algrithm.HashSlotAlgorithm
-          # 非默认值，直接对分片数取余
           directIndex: true
 
+
 props:
-  # 日志显示 SQL
   sql-show: true

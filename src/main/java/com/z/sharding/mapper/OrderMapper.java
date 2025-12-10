@@ -2,6 +2,7 @@ package com.z.sharding.mapper;
 
 import com.z.sharding.pojo.Order;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -12,5 +13,11 @@ public interface OrderMapper {
 
     List<Order> selectByUserId(String userId);
 
-    List<Order> selectByOrderId(long orderId);
-}
+    Order selectByOrderId(long orderId);
+
+    int updateOrderDynamic(Order order);
+
+    long selectVersion(long orderId);
+
+    int updateOrderWithVersion(@Param("order") Order order,
+                               @Param("oldVersion") long oldVersion);}

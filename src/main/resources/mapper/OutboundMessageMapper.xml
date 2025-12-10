@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.z.sharding.mapper.OutboundMessageMapper">
+    <insert id="insert" parameterType="com.z.sharding.pojo.OutboundMessage">
+        INSERT INTO outbound_message
+        (user_id, biz_key, version, topic, status)
+        VALUES
+        (#{userId}, #{bizKey}, #{version}, #{topic}, #{status})
+    </insert>
+
+    <select id="selectPending" resultType="com.z.sharding.pojo.OutboundMessage">
+        select
+            id,
+            biz_key as bizKey,
+            version,
+            topic,
+            status,
+            user_id as userId,
+        from outbound_message
+        where status = 0 order by id asc limit #{limit}
+    </select>
+
+    <update id="markSent">
+        update outbound_message
+        set status = 1，update_time = NOW() where id = #{id}
+    </update>
+</mapper>
+

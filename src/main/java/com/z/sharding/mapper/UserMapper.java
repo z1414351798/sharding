@@ -10,4 +10,6 @@ public interface UserMapper {
     void insert(User user);
 
     List<User> selectByUserId(String userId);
+
+    int updateUserDynamic(User user);
 }

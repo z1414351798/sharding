@@ -13,4 +13,6 @@ public interface OrderItemMapper {
     List<OrderItem> selectByOrderId(long orderId);
 
     List<OrderItem> selectByUserId(String userId);
+
+    int updateOrderItemDynamic(OrderItem orderItem);
 }

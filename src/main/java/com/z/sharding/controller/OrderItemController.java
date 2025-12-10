@@ -4,6 +4,7 @@ import com.z.sharding.generator.MySnowflakeGenerator;
 import com.z.sharding.mapper.OrderItemMapper;
 import com.z.sharding.pojo.Order;
 import com.z.sharding.pojo.OrderItem;
+import com.z.sharding.service.OrderItemService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,22 +15,25 @@ import java.util.List;
 @RequestMapping("/orderItem")
 @RequiredArgsConstructor
 public class OrderItemController {
-    private final OrderItemMapper orderItemMapper;
+    private final OrderItemService orderItemService;
 
     @PostMapping("/add")
-    public String addOrder(@RequestBody OrderItem orderItem) {
-        orderItem.setCreateTime(LocalDateTime.now());
-        orderItemMapper.insert(orderItem);
-        return "success";
+    public String addOrderItem(@RequestBody OrderItem orderItem) {
+        return orderItemService.addOrderItem(orderItem);
     }
 
     @GetMapping("/listByOrderId")
     public List<OrderItem> listByOrderId(@RequestParam  long orderId) {
-        return orderItemMapper.selectByOrderId(orderId);
+        return orderItemService.listByOrderId(orderId);
     }
 
     @GetMapping("/listByUserId")
     public List<OrderItem> listByUserId(@RequestParam  String userId) {
-        return orderItemMapper.selectByUserId(userId);
+        return orderItemService.listByUserId(userId);
+    }
+
+    @PostMapping("/update")
+    public int update(@RequestBody OrderItem orderItem) {
+        return orderItemService.update(orderItem);
     }
 }
